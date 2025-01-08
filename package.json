@@ -1,0 +1,28 @@
+{
+  "name": "load-test",
+  "version": "1.0.0",
+  "description": "Load testing scripts for our ogmaconceptions backend services",
+  "private": true,
+  "main": "functions.js",
+  "scripts": {
+    "test:recommenu": "artillery run ./scripts/recommenu-backend-load-test.yml --output ./reports/recommenu-load-test-report.json",
+    "test:iconcal": "artillery run ./scripts/iconcal-backend-load-test.yml --output ./reports/iconcal-load-test-report.json",
+    "test:report:recommenu": "artillery report --output ./reports/recommenu-load-test-report.html ./reports/recommenu-load-test-report.json",
+    "test:report:iconcal": "artillery report --output ./reports/iconcal-load-test-report.html ./reports/iconcal-load-test-report.json"
+  },
+  "author": {
+    "name": "Picon Kayal",
+    "email": "picon.kayal@ogmaconceptions.com"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.3.0",
+    "artillery": "^2.0.21"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}

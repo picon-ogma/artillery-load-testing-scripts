@@ -1,0 +1,175 @@
+config:
+  target: "https://dev-api.myrecommenu.com"
+  # Configuration: Total users limited to 1 <> 9875
+  # phases:
+  #   - duration: 10
+  #     # arrivalCount: 1 # 1 user through out the entire 10seconds session
+  #     arrivalRate: 1 # Start with 1 users per second
+  #     name: Warm up phase
+
+  #   - duration: 60
+  #     arrivalRate: 1 # Start with 1 users per second
+  #     rampTo: 200 # End with 200 users per second
+  #     name: "Ramp up phase"
+
+  #   - duration: 60
+  #     arrivalRate: 50 # Maintain 50 users per second
+  #     name: "Peak load phase"
+
+  #   - duration: 30
+  #     arrivalRate: 50 # Maintain 50 users per second
+  #     rampTo: 5 # Scale down to 5 users per second
+  #     name: "Scale down phase"
+
+  # Configuration: Total users limited to 1 <> 200
+  # phases:
+  #   - duration: 10
+  #     arrivalRate: 1
+  #     name: Warm up phase
+
+  #   - duration: 30
+  #     arrivalRate: 1
+  #     rampTo: 5
+  #     name: "Ramp up phase"
+
+  #   - duration: 30
+  #     arrivalRate: 5
+  #     name: "Peak load phase"
+
+  #   - duration: 20
+  #     arrivalRate: 5
+  #     rampTo: 1
+  #     name: "Scale down phase"
+
+  # Configuration: Total users limited to 1 <> 500
+  # phases:
+  #   - duration: 10
+  #     arrivalRate: 2
+  #     name: Warm up phase
+
+  #   - duration: 40
+  #     arrivalRate: 2
+  #     rampTo: 10
+  #     name: "Ramp up phase"
+
+  #   - duration: 40
+  #     arrivalRate: 10
+  #     name: "Peak load phase"
+
+  #   - duration: 20
+  #     arrivalRate: 10
+  #     rampTo: 2
+  #     name: "Scale down phase"
+
+  # Configuration: Total users limited to 1 <> 20
+  # phases:
+  #   - duration: 5
+  #     arrivalRate: 1
+  #     name: Warm up phase
+
+  #   - duration: 10
+  #     arrivalRate: 1
+  #     rampTo: 2
+  #     name: "Ramp up phase"
+
+  #   - duration: 10
+  #     arrivalRate: 2
+  #     name: "Peak load phase"
+
+  #   - duration: 5
+  #     arrivalRate: 2
+  #     rampTo: 1
+  #     name: "Scale down phase"
+  
+  # Configuration: Total users limited to 1 <> 50
+  # phases:
+  #   - duration: 10
+  #     arrivalRate: 1
+  #     name: Warm up phase
+
+  #   - duration: 15
+  #     arrivalRate: 1
+  #     rampTo: 3
+  #     name: "Ramp up phase"
+
+  #   - duration: 15
+  #     arrivalRate: 3
+  #     name: "Peak load phase"
+
+  #   - duration: 10
+  #     arrivalRate: 3
+  #     rampTo: 1
+  #     name: "Scale down phase"
+  
+  # Configuration: Total users limited to 1 <> 5
+  phases:
+    - duration: 3
+      arrivalRate: 1
+      name: Warm up phase
+
+    - duration: 4
+      arrivalRate: 1
+      name: "Peak phase"
+  
+  # Total users limited to 1 <> 10
+  # phases:
+  #   - duration: 5
+  #     arrivalRate: 1
+  #     name: Warm up phase
+
+  #   - duration: 5
+  #     arrivalRate: 1
+  #     name: "Peak phase"
+
+  variables:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+
+    bearerToken: "" # This will be updated dynamically using processor functions
+
+    groupIds: []
+
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+
+  http:
+    extendedMetrics: true
+
+  processor: "./functions.js"
+
+before:
+  flow:
+    - log: "Starting user load test"
+
+scenarios:
+  - name: "Create groups and get recommendations"
+    beforeScenario:
+      - "selectRandomToken" # or "selectRoundRobinToken"
+      - "initializeGroupIds"
+    flow:
+      - function: "generateGroupName"
+      - post:
+          url: "/group/create-group"
+          headers:
+            Authorization: "Bearer {{ bearerToken }}"
+          json:
+            groupName: "{{ groupName }}"
+            city: "Salt Lake City"
+            state: "Utah"
+          capture:
+            - json: "$.group.groupId"
+              as: "groupId"
+          afterResponse: "storeGroupIds"
+
+      - get:
+          url: "/group/get-restaurant-recommendations/{{ groupId }}"
+          headers:
+            Authorization: "Bearer {{ bearerToken }}"
+          qs:
+            latitude: 40.758701
+            longitude: -111.876183
+            radius: 5
+            unit: Mile

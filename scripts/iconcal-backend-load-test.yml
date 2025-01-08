@@ -1,0 +1,55 @@
+config:
+  target: "https://dev-api.iconcal.com"
+  phases:
+    - duration: 10
+      # arrivalCount: 1 # 1 user through out the entire 10seconds session
+      arrivalRate: 1 # Start with 1 users per second
+      name: Warm up phase
+
+    - duration: 60
+      arrivalRate: 1 # Start with 1 users per second
+      rampTo: 200 # End with 200 users per second
+      name: "Ramp up phase"
+
+    - duration: 60
+      arrivalRate: 50 # Maintain 50 users per second
+      name: "Peak load phase"
+
+    - duration: 30
+      arrivalRate: 50 # Maintain 50 users per second
+      rampTo: 5 # Scale down to 5 users per second
+      name: "Scale down phase"
+  variables:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+    iconcalJwtToken: ""
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  http:
+    extendedMetrics: true
+  processor: "./functions.js"
+
+scenarios:
+  - name: "User Flows"
+    beforeScenario:
+      - "selectIconCalJwtToken"
+    flow:
+      # User login
+      # - post:
+      #     url: "/auth/login"
+      #     json:
+      #       emailAddress: "jeet.chowdhury@gmail.com"
+      #       password: "AppsTest@123"
+      #       userType: "Administrator"
+      # User /me
+      - log: "Jwt {{ iconcalJwtToken }}"
+      - get:
+          url: "/auth/me"
+          headers:
+            Authorization: "Bearer {{ iconcalJwtToken }}"
+before:
+  flow:
+    - log: "Starting user load test"
