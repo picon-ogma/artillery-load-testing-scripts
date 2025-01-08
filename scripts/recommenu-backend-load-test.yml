@@ -102,14 +102,14 @@ config:
   #     name: "Scale down phase"
   
   # Configuration: Total users limited to 1 <> 5
-  phases:
-    - duration: 3
-      arrivalRate: 1
-      name: Warm up phase
+  # phases:
+  #   - duration: 3
+  #     arrivalRate: 1
+  #     name: Warm up phase
 
-    - duration: 4
-      arrivalRate: 1
-      name: "Peak phase"
+  #   - duration: 4
+  #     arrivalRate: 1
+  #     name: "Peak phase"
   
   # Total users limited to 1 <> 10
   # phases:
@@ -120,6 +120,20 @@ config:
   #   - duration: 5
   #     arrivalRate: 1
   #     name: "Peak phase"
+  
+  # Total users limited to 1 <> 25
+  phases:
+    - duration: 5
+      arrivalRate: 1  # 5 users total
+      name: Warm up phase
+
+    - duration: 10
+      arrivalRate: 1  # 10 more users
+      name: "Steady phase 1"
+
+    - duration: 5
+      arrivalRate: 2  # 10 more users
+      name: "Peak load phase"
 
   variables:
     headers:
